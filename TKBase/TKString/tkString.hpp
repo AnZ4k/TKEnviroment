@@ -25,18 +25,20 @@ namespace tkv {
     class tkString {
     public:
         // Construtores
-        tkString();
-        tkString(char* str);
-        tkString(std::string str);
-        tkString(std::string* str);
-        tkString(tkString* str);
-        tkString &operator=(char* str);
-        tkString &operator=(std::string str);
-        tkString &operator=(tkString);
-        tkString &operator+=(char* str);
-        tkString &operator+=(std::string str);
-        tkString &operator+=(tkString);
-        ~tkString();
+        tkString();                                                                             //ok
+        tkString(char* str);                                                                    //ok
+        tkString(std::string str);                                                              //ok
+        tkString(std::string* str);                                                             //ok                                                                          
+        tkString(tkString* str);                                                                //ok
+        tkString &operator=(char* str);                                                         //ok
+        tkString &operator=(std::string str);                                                   //ok
+        tkString &operator=(tkString);                                                          //ok
+        tkString &operator+=(char* str);                                                        //ok
+        tkString &operator+=(std::string str);                                                  //ok
+        tkString &operator+=(tkString);                                                         //ok
+        ~tkString();                                                                            //ok
+
+        char operator[](int index);                                                             //ok
 
         // Manipulacao de strings
         tkString *split(std::string mask, bool regexUsed = true);
@@ -67,9 +69,9 @@ namespace tkv {
         tkString camel(char *str, bool regexUsed = true);
         tkString reverse();
         tkString mirror();
-        tkString substring(int pi, int pf);
-        tkString substring(int pi);
-        tkString* substring(int* pis, int* pfs);
+        tkString substring(int pi, int pf);                                                                 //ok
+        tkString substring(int pi);                                                                         //ok
+        tkString* substring(int* pis, int* pfs);                                                            //ok
         tkString leftJoin(std::string str);
         tkString leftJoin(char *str);
         tkString leftJoin(std::string* s);
@@ -90,55 +92,55 @@ namespace tkv {
         tkString truncateFrom(int pi, int pf);
         tkString shuffle(int rounds = 1);
         tkString urlFriendly();
-        tkString format(std::string dlim, std::string data, bool regexUsed = false); //str str
-        tkString format(char* dlim, std::string data, bool regexUsed = false);              //char str
-        tkString format(char* dlim, char* data, bool regexUsed = false);                    //char char
-        tkString format(std::string dlim, char* data, bool regexUsed = false);       //str char
-        tkString format(std::string dlim, tkString data, bool regexUsed = false);    //str tstr
-        tkString format(std::string dlim, tkString* data, bool regexUsed = false);   //str tstr*
-        tkString format(char* dlim, tkString* data, bool regexUsed = false);                //char tstr*
-        tkString format(char* dlim, tkString data, bool regexUsed = false);                 //char tstr
-        tkString format(std::string dlim, std::string* data, bool regexUsed = false);//str str*
-        tkString format(char *dlim, std::string* data, bool regexUsed = false);             //char str*
-        tkString format(std::string dlim, tkAny data, bool regexUsed = false);       //str tany
-        tkString format(char  *dlim, tkAny data, bool regexUsed = false);                   //char tany
-        tkString format(std::string dlim, tkAny* data, bool regexUsed = false);      //str tany*
-        tkString format(char *dlim, tkAny* data, bool regexUsed = false);                   //char tany*
+        tkString format(std::string dlim, std::string data, bool regexUsed = false); 
+        tkString format(char* dlim, std::string data, bool regexUsed = false);       
+        tkString format(char* dlim, char* data, bool regexUsed = false);             
+        tkString format(std::string dlim, char* data, bool regexUsed = false);       
+        tkString format(std::string dlim, tkString data, bool regexUsed = false);    
+        tkString format(std::string dlim, tkString* data, bool regexUsed = false);   
+        tkString format(char* dlim, tkString* data, bool regexUsed = false);         
+        tkString format(char* dlim, tkString data, bool regexUsed = false);          
+        tkString format(std::string dlim, std::string* data, bool regexUsed = false);
+        tkString format(char *dlim, std::string* data, bool regexUsed = false);      
+        tkString format(std::string dlim, tkAny data, bool regexUsed = false);       
+        tkString format(char  *dlim, tkAny data, bool regexUsed = false);            
+        tkString format(std::string dlim, tkAny* data, bool regexUsed = false);      
+        tkString format(char *dlim, tkAny* data, bool regexUsed = false);            
         tkString decodeUrl();
         tkString normalize();
         tkString randomCase(int rounds = 1);
         tkString removeNotFriendly();
 
         // Busca e verificacao
-        bool startWith(std::string mask, bool regexUsed = true);
-        bool startWith(char* mask, bool regexUsed = true);
-        bool endWith(std::string mask, bool regexUsed = true);
-        bool endWith(char* mask, bool regexUsed = true);
-        bool startsWith(char mask, bool regexUsed = true);
-        bool endsWith(char mask, bool regexUsed = true);
-        char charAt(int p);
-        int length();
-        int indexOf(char ch);
-        int* indexOf(std::string mask, bool regexUsed = true);
-        int* indexOf(char *mask, bool regexUsed = true);
-        int** allIndexOf(std::string mask, bool regexUsed = true);
-        int** allIndexOf(char *mask, bool regexUsed = true);
-        int* lastIndexOf(std::string mask, bool regexUsed = true);
-        int* lastIndexOf(char *mask, bool regexUsed = true);
-        int lastIndexOf(char ch);
-        int* allIndexOf(char ch);
-        bool contains(std::string mask, bool regexUsed = true);
-        bool contains(char* mask, bool regexUsed = true);
-        int** oCurrencesOf(std::string mask, bool regexUsed = true);
-        int** oCurrencesOf(char *mask, bool regexUsed = true);
-        int** oCurrencesOf(char ch);
-        int** oCurrencesOf(tkString s, bool regexUsed = true);
+        bool startWith(std::string mask, bool regexUsed = true);                            //ok
+        bool startWith(char* mask, bool regexUsed = true);                                  //ok
+        bool startWith(char mask);                                                          //ok
+        bool endWith(std::string mask, bool regexUsed = true);                              //ok
+        bool endWith(char* mask, bool regexUsed = true);                                    //ok
+        bool endsWith(char mask);                                                           //ok
+        char charAt(int p);                                                                 //ok
+        int length();                                                                       //ok
+        int indexOf(char ch);                                                               //ok
+        int* indexOf(std::string mask, bool regexUsed = true);                              //ok
+        int* indexOf(char *mask, bool regexUsed = true);                                    //ok
+        int** allIndexOf(std::string mask, bool regexUsed = true);                          //ok
+        int** allIndexOf(char *mask, bool regexUsed = true);                                //ok
+        int* lastIndexOf(std::string mask, bool regexUsed = true);                          //ok
+        int* lastIndexOf(char *mask, bool regexUsed = true);                                //ok
+        int lastIndexOf(char ch);                                                           //ok
+        int* allIndexOf(char ch);                                                           //ok
+        bool contains(std::string mask, bool regexUsed = true);                             //ok
+        bool contains(char* mask, bool regexUsed = true);                                   //ok
+        bool contains(char mask);                                                           //ok
+        int occurrencesOf(std::string mask, bool regexUsed = true);                         //ok
+        int occurrencesOf(char *mask, bool regexUsed = true);                               //ok
+        int occurrencesOf(char ch);                                                         //ok
         
         // Getter e Setter
-        std::string get();
-        void set(std::string);
-        void set(tkString);
-        void set(char *str);
+        std::string get();                                                                  //ok
+        void set(std::string);                                                              //ok
+        void set(tkString);                                                                 //ok
+        void set(char *str);                                                                //ok
 
         // Auxiliares
         int* getNumbers();
@@ -154,8 +156,8 @@ namespace tkv {
 
     private:
         std::string _str = "";
-        tkInternalSearch evalueExpression(std::string mask);
-        tkInternalSearch evalueExpression(char *mask);
+        tkInternalSearch evalueExpression(std::string mask);                                //ok
+        tkInternalSearch evalueExpression(char *mask);                                      //ok
     };
 } // tkv
 #endif
