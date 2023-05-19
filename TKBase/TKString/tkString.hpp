@@ -1,5 +1,6 @@
 #include <string>
 #include <regex>
+#include <random>
 
 #ifndef TKSTRING
 #define TKSTRING
@@ -35,6 +36,7 @@ namespace tkv {
         tkString &operator=(tkString);                                                          //ok
         tkString &operator+=(char* str);                                                        //ok
         tkString &operator+=(std::string str);                                                  //ok
+        tkString &operator+=(char);                                                             //ok
         tkString &operator+=(tkString);                                                         //ok
         ~tkString();                                                                            //ok
 
@@ -45,28 +47,28 @@ namespace tkv {
         tkString *split(char *mask, bool regexUsed = true);
         tkString **split(std::string *mask, bool regexUsed = true);
         tkString **split(char **mask, bool regexUsed = true);
-        tkString replace(std::string mask, std::string newText, bool regexUsed = true);
-        tkString replace(std::string mask, char c, bool regexUsed = true);
-        tkString replace(std::string mask, char* newText, bool regexUsed = true);
-        tkString replace(std::string *mask, std::string* newText, bool regexUsed = true);
-        tkString replace(std::string *mask, std::string newText, bool regexUsed = true);
-        tkString replace(std::string *mask, char** newText, bool regexUsed = true);
-        tkString replace(std::string *mask, char* newText, bool regexUsed = true);
-        tkString replace(char *mask, std::string newText, bool regexUsed = true);
-        tkString replace(char *mask, char *newText, bool regexUsed = true);
-        tkString replace(char *mask, char c, bool regexUsed = true);
-        tkString replace(char **mask, char** newText, bool regexUsed = true);
-        tkString replace(char **mask, std::string* newText, bool regexUsed = true);
-        tkString replace(char **mask, std::string newText, bool regexUsed = true);
-        tkString trim();
-        tkString trimLeft();
-        tkString trimRight();
+        tkString replace(std::string mask, std::string newText, bool regexUsed = true);         //ok
+        tkString replace(std::string mask, char c, bool regexUsed = true);                      //ok
+        tkString replace(std::string mask, char* newText, bool regexUsed = true);               //ok
+        tkString replace(std::string *mask, std::string* newText, bool regexUsed = true);       //ok
+        tkString replace(std::string *mask, std::string newText, bool regexUsed = true);        //ok
+        tkString replace(std::string *mask, char** newText, bool regexUsed = true);             //ok
+        tkString replace(std::string *mask, char* newText, bool regexUsed = true);              //ok
+        tkString replace(char *mask, std::string newText, bool regexUsed = true);               //ok
+        tkString replace(char *mask, char *newText, bool regexUsed = true);                     //ok
+        tkString replace(char *mask, char c, bool regexUsed = true);                            //ok
+        tkString replace(char **mask, char** newText, bool regexUsed = true);                   //ok
+        tkString replace(char **mask, std::string* newText, bool regexUsed = true);             //ok
+        tkString replace(char **mask, std::string newText, bool regexUsed = true);              //ok
+        tkString trim();                                                                        //ok    
+        tkString trimLeft();                                                                    //ok
+        tkString trimRight();                                                                   //ok
         tkString upper(std::string mask = "", bool regexUsed = true);
-        tkString upper(char *str, bool regexUsed = true);
+        tkString upper(char *str, bool regexUsed = true);                                       //ok
         tkString lower(std::string mask = "", bool regexUsed = true);
-        tkString lower(char *str, bool regexUsed = true);
+        tkString lower(char *str, bool regexUsed = true);                                       //ok
         tkString camel(std::string mask = "", bool regexUsed = true);
-        tkString camel(char *str, bool regexUsed = true);
+        tkString camel(char *str, bool regexUsed = true);                                       //ok
         tkString reverse();
         tkString mirror();
         tkString substring(int pi, int pf);                                                                 //ok
@@ -143,16 +145,17 @@ namespace tkv {
         void set(char *str);                                                                //ok
 
         // Auxiliares
-        int* getNumbers();
-        tkString toBase64();
-        tkString fromBase64();
-        tkString randomString(int rounds = 1);
-        bool isEmpty();
-        bool isPalindrome();
-        bool isLowerCase();
-        bool isUpperCase();
-        bool isNumeric();
-        int levenshteinDistance();
+        int* getNumbers();                                                                  //ok
+        tkString encodeBase64();                                                            //ok    
+        tkString decodeBase64();                                                            //ok
+        tkString randomString(int length);                                                  //ok
+        bool isEmpty();                                                                     //ok
+        bool isPalindrome();                                                                //ok
+        bool isLowerCase();                                                                 //ok
+        bool isUpperCase();                                                                 //ok
+        bool isNumeric();                                                                   //ok
+        int levenshteinDistance(std::string str);                                           //ok
+        int levenshteinDistance(char* str);                                                 //ok
 
     private:
         std::string _str = "";
