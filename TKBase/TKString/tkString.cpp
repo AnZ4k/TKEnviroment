@@ -957,11 +957,6 @@ tkv::tkString tkv::tkString::lower(char *str, bool regexUsed = true)
     return this->lower(std::string(str), regexUsed);
 }
 
-tkv::tkString tkv::tkString::camel(char *str, bool regexUsed = true)
-{
-    return this->camel(std::string(str), regexUsed);
-}
-
 tkv::tkString tkv::tkString::reverse()
 {
     tkv::tkString ret = "";
@@ -977,4 +972,373 @@ tkv::tkString tkv::tkString::reverse()
 tkv::tkString tkv::tkString::mirror()
 {
     return this->get() + this->reverse().get();
+}
+
+tkv::tkString tkv::tkString::upper(std::string mask = "", bool regexUsed = true)
+{
+    tkString ret;
+    
+    if (mask.empty())
+    {
+        for (int i = 0; i < this->length(); i++)
+        {
+            if ((*this)[i] >= 'a' && (*this)[i] <= 'z')
+            {
+                ret += (*this)[i] - 32;
+            }
+        }
+
+        return ret;
+    }
+
+    if (regexUsed)
+    {
+        tkInternalSearch _res = evalueExpression(mask);
+
+        if (! _res.founded)
+            return tkv::tkString();
+
+        for (int i = 0; i < _res.count; i++)
+        {
+            std::string oldStr, newStr;
+            oldStr = this->substring(_res.pos[i][0], _res.pos[i][1]).get();
+            
+            for (int j = 0; j < oldStr.length(); j++)
+            {
+                newStr += oldStr[j] - 32;
+            }
+
+            ret = this->replace(oldStr, newStr, false);
+        }
+
+        return ret;
+    }
+    
+    int count = this->occurrencesOf(mask, false);
+
+    if (count <= 0)
+        return tkv::tkString();
+
+    int **matPos = this->allIndexOf(mask, false);
+   
+    if (matPos == nullptr)
+        return tkv::tkString();
+    
+    for (int i = 0; i < count; i++)
+    {
+        std::string oldStr, newStr;
+        oldStr = this->substring(matPos[i][0], matPos[i][1]).get();
+        
+        for (int j = 0; j < oldStr.length(); j++)
+        {
+            newStr += oldStr[j] - 32;
+        }
+
+        ret = this->replace(oldStr, newStr, false);
+    }
+    
+    return ret;
+}
+
+tkv::tkString tkv::tkString::lower(std::string mask = "", bool regexUsed = true)
+{
+    tkString ret;
+    
+    if (mask.empty())
+    {
+        for (int i = 0; i < this->length(); i++)
+        {
+            if ((*this)[i] >= 'A' && (*this)[i] <= 'Z')
+            {
+                ret += (*this)[i] + 32;
+            }
+        }
+
+        return ret;
+    }
+
+    if (regexUsed)
+    {
+        tkInternalSearch _res = evalueExpression(mask);
+
+        if (! _res.founded)
+            return tkv::tkString();
+
+        for (int i = 0; i < _res.count; i++)
+        {
+            std::string oldStr, newStr;
+            oldStr = this->substring(_res.pos[i][0], _res.pos[i][1]).get();
+            
+            for (int j = 0; j < oldStr.length(); j++)
+            {
+                newStr += oldStr[j] + 32;
+            }
+
+            ret = this->replace(oldStr, newStr, false);
+        }
+
+        return ret;
+    }
+    
+    int count = this->occurrencesOf(mask, false);
+
+    if (count <= 0)
+        return tkv::tkString();
+
+    int **matPos = this->allIndexOf(mask, false);
+   
+    if (matPos == nullptr)
+        return tkv::tkString();
+    
+    for (int i = 0; i < count; i++)
+    {
+        std::string oldStr, newStr;
+        oldStr = this->substring(matPos[i][0], matPos[i][1]).get();
+        
+        for (int j = 0; j < oldStr.length(); j++)
+        {
+            newStr += oldStr[j] + 32;
+        }
+
+        ret = this->replace(oldStr, newStr, false);
+    }
+    
+    return ret;
+}
+
+tkv::tkString* tkv::tkString::split(char* mask, bool regexUsed = true)
+{
+    return this->split(std::string(mask), regexUsed);
+}
+
+tkv::tkString* tkv::tkString::split(std::string mask, bool regexUsed = true)
+{
+    int count = this->occurrencesOf(mask, regexUsed);
+    int **matPos = this->allIndexOf(mask, regexUsed);
+    tkString *ret = new tkv::tkString[count];
+
+    if (matPos == nullptr)
+        return nullptr;
+
+    for (int i = 0, strI = 0, strF = 0; i < count; i++)
+    {
+        if (matPos[i] == nullptr)
+            return nullptr;
+
+        (matPos[i][1] >= this->length())? strI = (this->length() -1): strI = matPos[i][1];
+        (count <= (i + 1))? strF = (this->length() -1): strF = (matPos[i + i][0] -1);
+        ret[i] = this->substring(strI, strF);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::leftJoin(std::string str)
+{
+    tkv::tkString ret = str;
+    ret += this->get();
+    
+    return ret;
+}
+
+tkv::tkString tkv::tkString::rightJoin(std::string str)
+{
+    tkv::tkString ret = this->get();
+    ret += str;
+    
+    return ret;
+}
+
+tkv::tkString tkv::tkString::leftJoin(char *str)
+{
+    return this->leftJoin(std::string(str));
+}
+
+tkv::tkString tkv::tkString::rightJoin(char *str)
+{
+    return this->rightJoin(std::string(str));
+}
+
+tkv::tkString tkv::tkString::leftJoin(tkString str)
+{
+    return this->leftJoin(str.get());
+}
+
+tkv::tkString tkv::tkString::rightJoin(tkString str)
+{
+    return this->rightJoin(str.get());
+}
+
+tkv::tkString tkv::tkString::leftJoin(std::string *strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.leftJoin(strs[i]);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::rightJoin(std::string *strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.rightJoin(strs[i]);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::leftJoin(tkString *strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.leftJoin(strs[i]);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::rightJoin(tkString *strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.rightJoin(strs[i]);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::leftJoin(char **strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.leftJoin(strs[i]);
+    }
+
+    return ret;   
+}
+
+tkv::tkString tkv::tkString::rightJoin(char **strs)
+{
+    tkString ret = this->get();
+
+    if (strs == nullptr)
+        return tkv::tkString();
+
+    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    {
+        tkString tmBuf = ret;
+        ret = tmBuf.rightJoin(strs[i]);
+    }
+
+    return ret;
+}
+
+tkv::tkString tkv::tkString::leftJoin(char c)
+{
+    return this->leftJoin(std::string(1, c));
+}
+
+tkv::tkString tkv::tkString::rightJoin(char c)
+{
+    return this->rightJoin(std::string(1, c));
+}
+
+tkv::tkString tkv::tkString::truncate(int len)
+{
+    if (this->length() <= len)
+        return this->get();
+
+    return this->substring(0, len);
+}
+
+tkv::tkString tkv::tkString::truncateFrom(int pi, int len)
+{
+    if (this->length() <= len && pi >= 0 && pi < this->length())
+        return this->substring(pi, this->length() -1);
+    else if (this->length() <= len && pi < 0)
+        return tkv::tkString();
+    else if (this->length() <= len && pi >= this->length())
+        return tkv::tkString();
+    
+    return this->substring(pi, len);
+}
+
+tkv::tkString tkv::tkString::truncateFromFinal(int len)
+{
+    if (this->length() <= len)
+        return this->get();
+
+    return this->reverse().substring(0, len).reverse();
+}
+
+tkv::tkString tkv::tkString::shuffle()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(this->get().begin(), this->get().end(), gen);
+
+    return this->get();
+}
+
+tkv::tkString tkv::tkString::urlFriendly()
+{
+    tkv::tkString ret = this->get();
+    // 33 - 47
+    // 58 - 64
+    // 91 - 96
+    // 123 - 126
+    // 128
+    // 130 - 140 
+    // 142
+    // 145 - 156
+    // 158 255
+
+    for (int i = 0; i < ret.length(); i++)
+    {
+        tkString ret = this->get();
+        tkString buff;
+
+        if (((*this)[i] >= 21 && (*this)[i] <= 47) || 
+            ((*this)[i] >= 58 && (*this)[i] <= 64) || 
+            ((*this)[i] >= 91 && (*this)[i] <= 96) || 
+            ((*this)[i] >= 123 && (*this)[i] <= 126) || 
+            ((*this)[i] >= 128 && (*this)[i] <= 140) || 
+            ((*this)[i] >= 142 && (*this)[i] <= 156) || 
+            ((*this)[i] >= 158 && (*this)[i] <= 255))
+        {
+            buff = ret.replace(ret[i], "%" + std::to_string(static_cast<int>((*this)[i])));
+        }
+    }
 }

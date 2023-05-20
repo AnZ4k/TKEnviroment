@@ -43,10 +43,8 @@ namespace tkv {
         char operator[](int index);                                                             //ok
 
         // Manipulacao de strings
-        tkString *split(std::string mask, bool regexUsed = true);
-        tkString *split(char *mask, bool regexUsed = true);
-        tkString **split(std::string *mask, bool regexUsed = true);
-        tkString **split(char **mask, bool regexUsed = true);
+        tkString *split(std::string mask, bool regexUsed = true);                               //ok
+        tkString *split(char *mask, bool regexUsed = true);                                     //ok
         tkString replace(std::string mask, std::string newText, bool regexUsed = true);         //ok
         tkString replace(std::string mask, char c, bool regexUsed = true);                      //ok
         tkString replace(std::string mask, char* newText, bool regexUsed = true);               //ok
@@ -63,51 +61,34 @@ namespace tkv {
         tkString trim();                                                                        //ok    
         tkString trimLeft();                                                                    //ok
         tkString trimRight();                                                                   //ok
-        tkString upper(std::string mask = "", bool regexUsed = true);
+        tkString upper(std::string mask = "", bool regexUsed = true);                           //ok
         tkString upper(char *str, bool regexUsed = true);                                       //ok
-        tkString lower(std::string mask = "", bool regexUsed = true);
+        tkString lower(std::string mask = "", bool regexUsed = true);                           //ok
         tkString lower(char *str, bool regexUsed = true);                                       //ok
-        tkString camel(std::string mask = "", bool regexUsed = true);
-        tkString camel(char *str, bool regexUsed = true);                                       //ok
-        tkString reverse();
-        tkString mirror();
+        tkString reverse();                                                                     //ok
+        tkString mirror();                                                                      //ok
         tkString substring(int pi, int pf);                                                                 //ok
         tkString substring(int pi);                                                                         //ok
         tkString* substring(int* pis, int* pfs);                                                            //ok
-        tkString leftJoin(std::string str);
-        tkString leftJoin(char *str);
-        tkString leftJoin(std::string* s);
-        tkString leftJoin(char** strs);
-        tkString leftJoin(tkString s);
-        tkString leftJoin(tkString* s);
-        tkString leftJoin(char s);
-        tkString rightJoin(std::string s);
-        tkString rightJoin(char* s);
-        tkString rightJoin(std::string* s);
-        tkString rightJoin(char** s);
-        tkString rightJoin(tkString s);
-        tkString rightJoin(tkString* s);
-        tkString rightJoin(char s);
-        tkString truncate(int size);
-        tkString truncateFromFinal(int size);
-        tkString truncateFrom(int pi);
-        tkString truncateFrom(int pi, int pf);
-        tkString shuffle(int rounds = 1);
-        tkString urlFriendly();
-        tkString format(std::string dlim, std::string data, bool regexUsed = false); 
-        tkString format(char* dlim, std::string data, bool regexUsed = false);       
-        tkString format(char* dlim, char* data, bool regexUsed = false);             
-        tkString format(std::string dlim, char* data, bool regexUsed = false);       
-        tkString format(std::string dlim, tkString data, bool regexUsed = false);    
-        tkString format(std::string dlim, tkString* data, bool regexUsed = false);   
-        tkString format(char* dlim, tkString* data, bool regexUsed = false);         
-        tkString format(char* dlim, tkString data, bool regexUsed = false);          
-        tkString format(std::string dlim, std::string* data, bool regexUsed = false);
-        tkString format(char *dlim, std::string* data, bool regexUsed = false);      
-        tkString format(std::string dlim, tkAny data, bool regexUsed = false);       
-        tkString format(char  *dlim, tkAny data, bool regexUsed = false);            
-        tkString format(std::string dlim, tkAny* data, bool regexUsed = false);      
-        tkString format(char *dlim, tkAny* data, bool regexUsed = false);            
+        tkString leftJoin(std::string str);                                                                 //ok 
+        tkString leftJoin(char *str);                                                                       //ok 
+        tkString leftJoin(std::string* s);                                                                  //ok 
+        tkString leftJoin(char** strs);                                                                     //ok 
+        tkString leftJoin(tkString s);                                                                      //ok 
+        tkString leftJoin(tkString* s);                                                                     //ok 
+        tkString leftJoin(char s);                                                                          //ok 
+        tkString rightJoin(std::string s);                                                                  //ok     
+        tkString rightJoin(char* s);                                                                        //ok 
+        tkString rightJoin(std::string* s);                                                                 //ok     
+        tkString rightJoin(char** s);                                                                       //ok     
+        tkString rightJoin(tkString s);                                                                     //ok     
+        tkString rightJoin(tkString* s);                                                                    //ok     
+        tkString rightJoin(char s);                                                                         //ok     
+        tkString truncate(int size);                                                                        //ok        
+        tkString truncateFromFinal(int size);                                                               //ok    
+        tkString truncateFrom(int pi, int pf);                                                              //ok    
+        tkString shuffle();                                                                                 //ok   
+        tkString urlFriendly();           
         tkString decodeUrl();
         tkString normalize();
         tkString randomCase(int rounds = 1);
