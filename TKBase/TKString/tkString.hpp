@@ -1,6 +1,7 @@
 #include <string>
 #include <regex>
 #include <random>
+#include <iostream>
 
 #ifndef TKSTRING
 #define TKSTRING
@@ -39,28 +40,30 @@ namespace tkv {
         tkString &operator+=(char);                                                             //ok
         tkString &operator+=(tkString);                                                         //ok
         ~tkString();                                                                            //ok
-
+                                                                                                        // \ tesdados acima  
         char operator[](int index);                                                             //ok
 
         // Manipulacao de strings
         tkString *split(std::string mask, bool regexUsed = true);                               //ok
         tkString *split(char *mask, bool regexUsed = true);                                     //ok
-        tkString replace(std::string mask, std::string newText, bool regexUsed = true);         //ok
-        tkString replace(std::string mask, char c, bool regexUsed = true);                      //ok
-        tkString replace(std::string mask, char* newText, bool regexUsed = true);               //ok
+        tkString replace(std::string mask, std::string newText, bool regexUsed = true);         //ok   //testado
+        tkString replace(std::string mask, char c, bool regexUsed = true);                      //ok   //testado
+        tkString replace(std::string mask, char* newText, bool regexUsed = true);               //ok   //testado
         tkString replace(std::string *mask, std::string* newText, bool regexUsed = true);       //ok
         tkString replace(std::string *mask, std::string newText, bool regexUsed = true);        //ok
         tkString replace(std::string *mask, char** newText, bool regexUsed = true);             //ok
         tkString replace(std::string *mask, char* newText, bool regexUsed = true);              //ok
+        tkString replace(char c, std::string newText);                                          //ok
+        tkString replace(char c, char* newText);                                                //ok
         tkString replace(char *mask, std::string newText, bool regexUsed = true);               //ok
         tkString replace(char *mask, char *newText, bool regexUsed = true);                     //ok
         tkString replace(char *mask, char c, bool regexUsed = true);                            //ok
         tkString replace(char **mask, char** newText, bool regexUsed = true);                   //ok
         tkString replace(char **mask, std::string* newText, bool regexUsed = true);             //ok
         tkString replace(char **mask, std::string newText, bool regexUsed = true);              //ok
-        tkString trim();                                                                        //ok    
-        tkString trimLeft();                                                                    //ok
-        tkString trimRight();                                                                   //ok
+        tkString trim();                                                                        //ok    //testado     
+        tkString trimLeft();                                                                    //ok    //testado
+        tkString trimRight();                                                                   //ok    //testado
         tkString upper(std::string mask = "", bool regexUsed = true);                           //ok
         tkString upper(char *str, bool regexUsed = true);                                       //ok
         tkString lower(std::string mask = "", bool regexUsed = true);                           //ok
@@ -88,11 +91,7 @@ namespace tkv {
         tkString truncateFromFinal(int size);                                                               //ok    
         tkString truncateFrom(int pi, int pf);                                                              //ok    
         tkString shuffle();                                                                                 //ok   
-        tkString urlFriendly();           
-        tkString decodeUrl();
-        tkString normalize();
-        tkString randomCase(int rounds = 1);
-        tkString removeNotFriendly();
+        tkString randomCase();                                                                              //ok
 
         // Busca e verificacao
         bool startWith(std::string mask, bool regexUsed = true);                            //ok
@@ -140,8 +139,8 @@ namespace tkv {
 
     private:
         std::string _str = "";
-        tkInternalSearch evalueExpression(std::string mask);                                //ok
-        tkInternalSearch evalueExpression(char *mask);                                      //ok
+        tkInternalSearch evalueExpression(std::string mask);                                //ok    //testado
+        tkInternalSearch evalueExpression(char *mask);                                      //ok    //testado
     };
 } // tkv
 #endif

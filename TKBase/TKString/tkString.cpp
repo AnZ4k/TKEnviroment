@@ -123,6 +123,7 @@ tkv::tkInternalSearch tkv::tkString::evalueExpression(std::string mask)
 {
     tkv::tkInternalSearch result;
     std::regex pattern(mask);
+    
 
     if (std::regex_search(this->get(), pattern))
     {
@@ -133,21 +134,22 @@ tkv::tkInternalSearch tkv::tkString::evalueExpression(std::string mask)
         return result;
     }
 
-    std::sregex_iterator it (this->get().begin(), this->get().end(), pattern);
+    std::string tmpBuf = this->get();
+    std::sregex_iterator it (tmpBuf.begin(), tmpBuf.end(), pattern);
     std::sregex_iterator end;
 
-    for (; it!= end; ++it)
+    for (; it!= end; it++)
     {
         result.count++;
     }
     
     result.pos = new int*[result.count];
-    it = std::sregex_iterator(this->get().begin(), this->get().end(), pattern);
+    it = std::sregex_iterator(tmpBuf.begin(), tmpBuf.end(), pattern);
 
-    for (int i = 0; it!= end; ++it, i++)
+    for (int i = 0; it!= end && i < result.count; it++, i++)
     {
         std::smatch match = *it;
-        result.pos[i] = new int(i);
+        result.pos[i] = new int[2];
         result.pos[i][0] = match.position();
         result.pos[i][1] = match.position() + match.length() -1;
     }
@@ -165,7 +167,7 @@ int tkv::tkString::length()
     return this->_str.length();
 }
 
-bool tkv::tkString::startWith(char* mask, bool regexUsed = true)
+bool tkv::tkString::startWith(char* mask, bool regexUsed)
 {
     return this->startWith(std::string(mask), regexUsed);
 }
@@ -198,7 +200,7 @@ bool tkv::tkString::startWith(char mask)
     return ((*this)[0] == mask);
 }
 
-bool tkv::tkString::endWith(char* mask, bool regexUsed = true)
+bool tkv::tkString::endWith(char* mask, bool regexUsed)
 {
     return this->endWith(std::string(mask), regexUsed);
 }
@@ -325,7 +327,7 @@ int tkv::tkString::lastIndexOf(char ch)
     return -1;
 }
 
-int* tkv::tkString::indexOf(std::string str, bool regexUsed = true)
+int* tkv::tkString::indexOf(std::string str, bool regexUsed)
 {
     int **mat = this->allIndexOf(str);
 
@@ -341,12 +343,12 @@ int* tkv::tkString::indexOf(std::string str, bool regexUsed = true)
     return mat[0];
 }
 
-int* tkv::tkString::indexOf(char *str, bool regexUsed = true)
+int* tkv::tkString::indexOf(char *str, bool regexUsed)
 {
     return this->indexOf(std::string(str), regexUsed);
 }
 
-int* tkv::tkString::lastIndexOf(std::string str, bool regexUsed = true)
+int* tkv::tkString::lastIndexOf(std::string str, bool regexUsed)
 {
     int **mat = this->allIndexOf(str);
 
@@ -366,12 +368,12 @@ int* tkv::tkString::lastIndexOf(std::string str, bool regexUsed = true)
     return mat[sizeof(mat) / sizeof(mat[0]) -1];
 }
 
-int* tkv::tkString::lastIndexOf(char *str, bool regexUsed = true)
+int* tkv::tkString::lastIndexOf(char *str, bool regexUsed)
 {
     return this->lastIndexOf(std::string(str), regexUsed);
 }
 
-int** tkv::tkString::allIndexOf(std::string str, bool regexUsed = true)
+int** tkv::tkString::allIndexOf(std::string str, bool regexUsed)
 {
     if (str.empty())
     {
@@ -381,7 +383,7 @@ int** tkv::tkString::allIndexOf(std::string str, bool regexUsed = true)
     if (regexUsed)
     {
         tkv::tkInternalSearch result = this->evalueExpression(str);
-    
+
         if (result.founded)
         {
             return result.pos;
@@ -418,12 +420,12 @@ int** tkv::tkString::allIndexOf(std::string str, bool regexUsed = true)
     return mat;
 }
 
-int** tkv::tkString::allIndexOf(char *str, bool regexUsed = true)
+int** tkv::tkString::allIndexOf(char *str, bool regexUsed)
 {
     return this->allIndexOf(std::string(str), regexUsed);
 }
 
-int tkv::tkString::occurrencesOf(std::string str, bool regexUsed = true)
+int tkv::tkString::occurrencesOf(std::string str, bool regexUsed)
 {
     if (str.empty())
     {
@@ -459,7 +461,7 @@ int tkv::tkString::occurrencesOf(std::string str, bool regexUsed = true)
     return c;
 }
 
-int tkv::tkString::occurrencesOf(char *str, bool regexUsed = true)
+int tkv::tkString::occurrencesOf(char *str, bool regexUsed)
 {
     return this->occurrencesOf(std::string(str), regexUsed);
 }
@@ -479,7 +481,7 @@ int tkv::tkString::occurrencesOf(char ch)
     return c;
 }
 
-bool tkv::tkString::contains(std::string str, bool regexUsed = true)
+bool tkv::tkString::contains(std::string str, bool regexUsed)
 {
     if (str.empty())
     {
@@ -489,7 +491,7 @@ bool tkv::tkString::contains(std::string str, bool regexUsed = true)
     return (this->occurrencesOf(str, regexUsed) > 0);
 }
 
-bool tkv::tkString::contains(char *str, bool regexUsed = true)
+bool tkv::tkString::contains(char *str, bool regexUsed)
 {
     return this->contains(std::string(str), regexUsed);
 }
@@ -721,17 +723,49 @@ tkv::tkString tkv::tkString::decodeBase64()
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(std::string mask, std::string newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string mask, std::string newText, bool regexUsed)
 {
-    if (regexUsed)
-    {
-        return tkv::tkString(std::regex_replace(this->get(), std::regex(mask), newText));
-    }
+    if (mask.empty() || newText.empty())
+        return this;
 
-    return tkv::tkString(this->get().replace(this->get().find(mask), mask.length(), newText));
+    tkString result;
+
+    int **mat = this->allIndexOf(mask, regexUsed);
+    int occr = this->occurrencesOf(mask, regexUsed);
+    bool iniciar_sub = false;
+
+    if (mat == nullptr || occr == 0)
+        return this;
+
+    for (int i = 0; i < this->length(); i++)
+    {    
+        int ni = 0;
+        for (int j = 0; j < occr; j++)
+        {
+            if (i >= mat[j][0] && i <= mat[j][1])
+            {
+                iniciar_sub = true;
+                ni = mat[j][1];
+                break;
+            }
+        }
+
+        if (iniciar_sub)
+        {
+            result += newText;
+            i = ni;
+            iniciar_sub = false;
+        }
+        else
+        {   
+            result += (*this)[i];
+        }
+    }
+    return result;
+
 }
 
-tkv::tkString tkv::tkString::replace(std::string mask, char c, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string mask, char c, bool regexUsed)
 {
     if (regexUsed)
     {
@@ -741,35 +775,36 @@ tkv::tkString tkv::tkString::replace(std::string mask, char c, bool regexUsed = 
     return tkv::tkString(this->get().replace(this->get().find(mask), mask.length(), std::string(1, c)));
 }
 
-tkv::tkString tkv::tkString::replace(std::string mask, char* newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string mask, char* newText, bool regexUsed)
 {
     return this->replace(mask, std::string(newText), regexUsed); 
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, std::string* newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string *mask, std::string* newText, bool regexUsed)
 {
     tkv::tkString ret = "";
-    tkv::tkString tmBuf = "";
+    tkv::tkString tmBuf = this->get();
 
     if (mask == nullptr || newText == nullptr)
     {
+        std::cout << "caiu no if\n";    
         return tkv::tkString();
     }
     else if (sizeof(mask) / sizeof(mask[0]) != sizeof(newText) / sizeof(newText[0]))
     {
+        
         return tkv::tkString();
     }
 
     for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
     {
-        tmBuf = this->replace(mask[i], newText[i], regexUsed);
-        ret = tmBuf;
+        ret = tmBuf.replace(mask[i], newText[i], regexUsed);
     }
     
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, std::string newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string *mask, std::string newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -788,7 +823,7 @@ tkv::tkString tkv::tkString::replace(std::string *mask, std::string newText, boo
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, char** newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string *mask, char** newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -811,7 +846,7 @@ tkv::tkString tkv::tkString::replace(std::string *mask, char** newText, bool reg
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, char* newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(std::string *mask, char* newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -830,22 +865,22 @@ tkv::tkString tkv::tkString::replace(std::string *mask, char* newText, bool rege
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(char *mask, std::string newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char *mask, std::string newText, bool regexUsed)
 {
     return this->replace(std::string(mask), newText, regexUsed);
 }
 
-tkv::tkString tkv::tkString::replace(char *mask, char *newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char *mask, char *newText, bool regexUsed)
 {
     return this->replace(std::string(mask), std::string(newText), regexUsed);
 }
 
-tkv::tkString tkv::tkString::replace(char *mask, char c, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char *mask, char c, bool regexUsed)
 {
     return this->replace(std::string(mask), c, regexUsed);
 }
 
-tkv::tkString tkv::tkString::replace(char **mask, char** newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char **mask, char** newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -868,7 +903,7 @@ tkv::tkString tkv::tkString::replace(char **mask, char** newText, bool regexUsed
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(char **mask, std::string* newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char **mask, std::string* newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -891,7 +926,7 @@ tkv::tkString tkv::tkString::replace(char **mask, std::string* newText, bool reg
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(char **mask, std::string newText, bool regexUsed = true)
+tkv::tkString tkv::tkString::replace(char **mask, std::string newText, bool regexUsed)
 {
     tkv::tkString ret = "";
     tkv::tkString tmBuf = "";
@@ -908,6 +943,16 @@ tkv::tkString tkv::tkString::replace(char **mask, std::string newText, bool rege
     }
     
     return ret;
+}
+
+tkv::tkString tkv::tkString::replace(char c, std::string newText)
+{
+    return this->replace(std::string(1, c), newText);
+}
+
+tkv::tkString tkv::tkString::replace(char c, char* newText)
+{
+    return this->replace(std::string(1,c), std::string(newText));
 }
 
 tkv::tkString tkv::tkString::trimLeft()
@@ -947,12 +992,12 @@ tkv::tkString tkv::tkString::trim()
     return this->trimLeft().trimRight(); 
 }
 
-tkv::tkString tkv::tkString::upper(char* str, bool regexUsed = true)
+tkv::tkString tkv::tkString::upper(char* str, bool regexUsed)
 {
     return this->upper(std::string(str), regexUsed);
 }
 
-tkv::tkString tkv::tkString::lower(char *str, bool regexUsed = true)
+tkv::tkString tkv::tkString::lower(char *str, bool regexUsed)
 {
     return this->lower(std::string(str), regexUsed);
 }
@@ -974,7 +1019,7 @@ tkv::tkString tkv::tkString::mirror()
     return this->get() + this->reverse().get();
 }
 
-tkv::tkString tkv::tkString::upper(std::string mask = "", bool regexUsed = true)
+tkv::tkString tkv::tkString::upper(std::string mask, bool regexUsed)
 {
     tkString ret;
     
@@ -1040,7 +1085,7 @@ tkv::tkString tkv::tkString::upper(std::string mask = "", bool regexUsed = true)
     return ret;
 }
 
-tkv::tkString tkv::tkString::lower(std::string mask = "", bool regexUsed = true)
+tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
 {
     tkString ret;
     
@@ -1106,12 +1151,12 @@ tkv::tkString tkv::tkString::lower(std::string mask = "", bool regexUsed = true)
     return ret;
 }
 
-tkv::tkString* tkv::tkString::split(char* mask, bool regexUsed = true)
+tkv::tkString* tkv::tkString::split(char* mask, bool regexUsed)
 {
     return this->split(std::string(mask), regexUsed);
 }
 
-tkv::tkString* tkv::tkString::split(std::string mask, bool regexUsed = true)
+tkv::tkString* tkv::tkString::split(std::string mask, bool regexUsed)
 {
     int count = this->occurrencesOf(mask, regexUsed);
     int **matPos = this->allIndexOf(mask, regexUsed);
@@ -1312,33 +1357,31 @@ tkv::tkString tkv::tkString::shuffle()
     return this->get();
 }
 
-tkv::tkString tkv::tkString::urlFriendly()
+tkv::tkString tkv::tkString::randomCase()
 {
-    tkv::tkString ret = this->get();
-    // 33 - 47
-    // 58 - 64
-    // 91 - 96
-    // 123 - 126
-    // 128
-    // 130 - 140 
-    // 142
-    // 145 - 156
-    // 158 255
-
-    for (int i = 0; i < ret.length(); i++)
+    tkv::tkString ret;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 1000);
+    
+    for (int i = 0; i < this->length(); i++)
     {
-        tkString ret = this->get();
-        tkString buff;
-
-        if (((*this)[i] >= 21 && (*this)[i] <= 47) || 
-            ((*this)[i] >= 58 && (*this)[i] <= 64) || 
-            ((*this)[i] >= 91 && (*this)[i] <= 96) || 
-            ((*this)[i] >= 123 && (*this)[i] <= 126) || 
-            ((*this)[i] >= 128 && (*this)[i] <= 140) || 
-            ((*this)[i] >= 142 && (*this)[i] <= 156) || 
-            ((*this)[i] >= 158 && (*this)[i] <= 255))
-        {
-            buff = ret.replace(ret[i], "%" + std::to_string(static_cast<int>((*this)[i])));
+        if (dis(gen) %2 == 0)
+        {//uper
+            if ((*this)[i] >= 'a' && (*this)[i] <= 'z')
+            {
+                ret += (*this)[i] - 32;
+                continue;
+            }
         }
+        else
+        {
+            if ((*this)[i] >= 'A' && (*this)[i] <= 'Z')
+            {
+                ret += (*this)[i] + 32;
+                continue;
+            }
+        }
+        ret += (*this)[i];
     }
 }
