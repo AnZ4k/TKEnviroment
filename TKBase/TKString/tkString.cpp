@@ -246,9 +246,9 @@ tkv::tkString tkv::tkString::substring(int pi, int pf)
         pf = 0;
     }
    
-    if (pf > this->length() -1)
+    if (pf > this->length())
     {
-        pf = this->length() -1;
+        pf = this->length();
     }
    
     if (pi > pf)
@@ -256,7 +256,7 @@ tkv::tkString tkv::tkString::substring(int pi, int pf)
         return "";           
     }                       
    
-    return (tkv::tkString) this->get().substr(pi, pf - pi + 1);
+    return (tkv::tkString) this->get().substr(pi, pf - pi);
 }
 
 tkv::tkString tkv::tkString::substring(int pi)
@@ -276,9 +276,9 @@ tkv::tkString* tkv::tkString::substring(int *pis, int *pfs)
         return nullptr;
     }
     
-    tkString *strs = new tkv::tkString[sizeof(pis) / sizeof(int)];
+    tkString *strs = new tkv::tkString[sizeof(pis) / sizeof(int) + 1];
 
-    for (int i = 0; i < sizeof(pis) / sizeof(int); i)
+    for (int i = 0; i <= sizeof(pis) / sizeof(int); i++)
     {
         strs[i] = this->substring(pis[i], pfs[i]);
     }
@@ -403,15 +403,15 @@ int** tkv::tkString::allIndexOf(std::string str, bool regexUsed)
 
     int **mat = new int*[c];
 
-    for (int i = 0, mi = 0; i < this->length(); i++)
+    for (int i = 0, mi = 0; i <= this->length(); i++)
     {
-        if ((*this)[i] == str[0] && i + str.length() < this->length())
+        if ((*this)[i] == str[0] && i + str.length() <= this->length())
         {
-            if (this->substring(i, i + str.length() -1).get() == str)
+            if (this->substring(i, i + str.length()).get() == str)
             {
                 mat[mi] = new int[2];
                 mat[mi][0] = i;
-                mat[mi][1] = i + str.length() -1;
+                mat[mi][1] = i + str.length();
                 mi ++;
             }
         }
@@ -449,9 +449,9 @@ int tkv::tkString::occurrencesOf(std::string str, bool regexUsed)
 
     for (int i = 0; i < this->length(); i++)
     {
-        if ((*this)[i] == str[0] && i + str.length() < this->length())
+        if ((*this)[i] == str[0] && i + str.length() <= this->length())
         {
-            if (this->substring(i, i + str.length() -1).get() == str)
+            if (this->substring(i, i + str.length()).get() == str)
             {
                 c ++;
             }
@@ -514,7 +514,7 @@ int* tkv::tkString::getNumbers()
 
     for (int i = 0; i < result.count; i++)
     {
-        res[i] = std::stoi(this->substring(result.pos[i][0], result.pos[i][1]).get());
+        res[i] = std::stoi(this->substring(result.pos[i][0], result.pos[i][1]+1).get());
     }
 
     return res;
@@ -648,35 +648,38 @@ tkv::tkString tkv::tkString::encodeBase64()
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
+
     std::string ret;
-    int i = 0;
     int padding = 0;
     int val = 0;
 
     for (auto c : this->get()) 
     {
-        val = (val<<8) + c;
-        padding += 2;
+        unsigned char uc = static_cast<unsigned char>(c); // Conversão explícita para unsigned char
+        val = (val << 8) + uc;
+        padding += 8;
 
-        while (padding >= 0) 
+        while (padding >= 6) 
         {
-            ret += base64_chars[(val>>padding)&0x3F];
             padding -= 6;
+            ret += base64_chars[(val >> padding) & 0x3F];
         }
     }
 
-    if (padding == -4) 
+    if (padding > 0) 
     {
-        ret += base64_chars[(val&0xF)<<2];
-        ret += "==";
-    }
-    else if (padding == -2) 
-    {
-        ret += base64_chars[(val&0x3)<<4];
-        ret += "=";
+        val <<= (6 - padding);
+        ret += base64_chars[val & 0x3F];
+        padding += 2;
+
+        while (padding < 8) 
+        {
+            ret += '=';
+            padding += 2;
+        }
     }
 
-    return ret;
+    return tkv::tkString(ret);
 }
 
 tkv::tkString tkv::tkString::decodeBase64()
@@ -780,90 +783,44 @@ tkv::tkString tkv::tkString::replace(std::string mask, char* newText, bool regex
     return this->replace(mask, std::string(newText), regexUsed); 
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, std::string* newText, bool regexUsed)
+tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::vector<std::string> newText, bool regexUsed)
 {
-    tkv::tkString ret = "";
-    tkv::tkString tmBuf = this->get();
-
-    if (mask == nullptr || newText == nullptr)
-    {
-        std::cout << "caiu no if\n";    
-        return tkv::tkString();
-    }
-    else if (sizeof(mask) / sizeof(mask[0]) != sizeof(newText) / sizeof(newText[0]))
-    {
-        
-        return tkv::tkString();
-    }
-
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
-    {
-        ret = tmBuf.replace(mask[i], newText[i], regexUsed);
-    }
-    
-    return ret;
-}
-
-tkv::tkString tkv::tkString::replace(std::string *mask, std::string newText, bool regexUsed)
-{
-    tkv::tkString ret = "";
+    tkv::tkString ret = this->get();
     tkv::tkString tmBuf = "";
 
-    if (mask == nullptr || newText.empty())
+    if (mask.empty() || newText.empty())
     {
         return tkv::tkString();
     }
 
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
+    for (int i = 0; i < mask.size(); i++)
     {
-        tkv::tkString tmBuf = this->replace(mask[i], newText, regexUsed);
-        ret = tmBuf;
-    }   
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::replace(std::string *mask, char** newText, bool regexUsed)
-{
-    tkv::tkString ret = "";
-    tkv::tkString tmBuf = "";
-
-    if (mask == nullptr || newText == nullptr)
-    {
-        return tkv::tkString();
-    }
-    else if (sizeof(mask) / sizeof(mask[0])!= sizeof(newText) / sizeof(newText[0]))
-    {
-        return tkv::tkString();
-    }
-
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
-    {
-        tmBuf = this->replace(mask[i], newText[i], regexUsed);
+        tmBuf = ret.replace(mask[i], newText[i], regexUsed);
         ret = tmBuf;
     }
 
     return ret;
 }
 
-tkv::tkString tkv::tkString::replace(std::string *mask, char* newText, bool regexUsed)
+tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::string newText, bool regexUsed)
 {
-    tkv::tkString ret = "";
+    tkv::tkString ret = this->get();
     tkv::tkString tmBuf = "";
 
-    if (mask == nullptr || newText == nullptr)
+    if (mask.empty() || newText.empty())
     {
         return tkv::tkString();
     }
 
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
+    for (int i = 0; i < mask.size(); i++)
     {
-        tmBuf = this->replace(mask[i], newText, regexUsed);
+        tmBuf = ret.replace(mask[i], newText, regexUsed);
         ret = tmBuf;
     }
 
     return ret;
 }
+
 
 tkv::tkString tkv::tkString::replace(char *mask, std::string newText, bool regexUsed)
 {
@@ -878,71 +835,6 @@ tkv::tkString tkv::tkString::replace(char *mask, char *newText, bool regexUsed)
 tkv::tkString tkv::tkString::replace(char *mask, char c, bool regexUsed)
 {
     return this->replace(std::string(mask), c, regexUsed);
-}
-
-tkv::tkString tkv::tkString::replace(char **mask, char** newText, bool regexUsed)
-{
-    tkv::tkString ret = "";
-    tkv::tkString tmBuf = "";
-
-    if (mask == nullptr || newText == nullptr)
-    {
-        return tkv::tkString();
-    }
-    else if (sizeof(mask) / sizeof(mask[0])!= sizeof(newText) / sizeof(newText[0]))
-    {
-        return tkv::tkString();
-    }
-
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
-    {
-        tmBuf = this->replace(mask[i], newText[i], regexUsed);
-        ret = tmBuf;
-    }
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::replace(char **mask, std::string* newText, bool regexUsed)
-{
-    tkv::tkString ret = "";
-    tkv::tkString tmBuf = "";
-
-    if (mask == nullptr || newText == nullptr)
-    {
-        return tkv::tkString();
-    }
-    else if (sizeof(mask) / sizeof(mask[0])!= sizeof(newText) / sizeof(newText[0]))
-    {
-        return tkv::tkString();
-    }
-
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
-    {
-        tmBuf = this->replace(mask[i], newText[i], regexUsed);
-        ret = tmBuf;
-    }
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::replace(char **mask, std::string newText, bool regexUsed)
-{
-    tkv::tkString ret = "";
-    tkv::tkString tmBuf = "";
-
-    if (mask == nullptr || newText.empty())
-    {
-        return tkv::tkString();
-    }
-
-    for (int i = 0; i < sizeof(mask) / sizeof(mask[0]); i++)
-    {
-        tmBuf = this->replace(mask[i], newText, regexUsed);
-        ret = tmBuf;
-    }
-    
-    return ret;
 }
 
 tkv::tkString tkv::tkString::replace(char c, std::string newText)
@@ -1031,6 +923,10 @@ tkv::tkString tkv::tkString::upper(std::string mask, bool regexUsed)
             {
                 ret += (*this)[i] - 32;
             }
+            else
+            {
+                ret += (*this)[i];
+            }
         }
 
         return ret;
@@ -1043,14 +939,20 @@ tkv::tkString tkv::tkString::upper(std::string mask, bool regexUsed)
         if (! _res.founded)
             return tkv::tkString();
 
+        std::string oldStr, newStr;
         for (int i = 0; i < _res.count; i++)
         {
-            std::string oldStr, newStr;
+            int x = _res.pos[i][0];
+            int y = _res.pos[i][1];
             oldStr = this->substring(_res.pos[i][0], _res.pos[i][1]).get();
             
+            newStr = "";
             for (int j = 0; j < oldStr.length(); j++)
             {
-                newStr += oldStr[j] - 32;
+                if (oldStr[j] >= 'a' && oldStr[j] <= 'z')
+                    newStr += oldStr[j] - 32;
+                else
+                    newStr += oldStr[j];
             }
 
             ret = this->replace(oldStr, newStr, false);
@@ -1076,7 +978,10 @@ tkv::tkString tkv::tkString::upper(std::string mask, bool regexUsed)
         
         for (int j = 0; j < oldStr.length(); j++)
         {
-            newStr += oldStr[j] - 32;
+            if (oldStr[j] >= 'a' && oldStr[j] <= 'z')
+                newStr += oldStr[j] - 32;
+            else
+                newStr += oldStr[j];
         }
 
         ret = this->replace(oldStr, newStr, false);
@@ -1097,6 +1002,10 @@ tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
             {
                 ret += (*this)[i] + 32;
             }
+            else
+            {
+                ret += (*this)[i];
+            }
         }
 
         return ret;
@@ -1116,7 +1025,10 @@ tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
             
             for (int j = 0; j < oldStr.length(); j++)
             {
-                newStr += oldStr[j] + 32;
+                if (oldStr[j] >= 'A' && oldStr[j] <= 'Z')
+                    newStr += oldStr[j] + 32;
+                else
+                    newStr += oldStr[j];
             }
 
             ret = this->replace(oldStr, newStr, false);
@@ -1140,9 +1052,12 @@ tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
         std::string oldStr, newStr;
         oldStr = this->substring(matPos[i][0], matPos[i][1]).get();
         
-        for (int j = 0; j < oldStr.length(); j++)
+        for (int j = 0; j <= oldStr.length(); j++)
         {
-            newStr += oldStr[j] + 32;
+            if (oldStr[j] >= 'A' && oldStr[j] <= 'Z')
+                newStr += oldStr[j] + 32;
+            else
+                newStr += oldStr[j];
         }
 
         ret = this->replace(oldStr, newStr, false);
@@ -1151,28 +1066,47 @@ tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
     return ret;
 }
 
-tkv::tkString* tkv::tkString::split(char* mask, bool regexUsed)
+std::vector<tkv::tkString> tkv::tkString::split(char* mask, bool regexUsed)
 {
     return this->split(std::string(mask), regexUsed);
 }
 
-tkv::tkString* tkv::tkString::split(std::string mask, bool regexUsed)
+std::vector<tkv::tkString> tkv::tkString::split(std::string mask, bool regexUsed)
 {
     int count = this->occurrencesOf(mask, regexUsed);
     int **matPos = this->allIndexOf(mask, regexUsed);
-    tkString *ret = new tkv::tkString[count];
+    std::vector<tkv::tkString> sw,ret;
+    tkv::tkString buff = this->get();
+    tkv::tkString buff2;
+    int rs = 0, ls=0, lms=0, i = 0, strI = 0, strF = 0;
 
     if (matPos == nullptr)
-        return nullptr;
+        return std::vector<tkv::tkString>();
 
     for (int i = 0, strI = 0, strF = 0; i < count; i++)
     {
         if (matPos[i] == nullptr)
-            return nullptr;
+            return std::vector<tkv::tkString>();
 
-        (matPos[i][1] >= this->length())? strI = (this->length() -1): strI = matPos[i][1];
-        (count <= (i + 1))? strF = (this->length() -1): strF = (matPos[i + i][0] -1);
-        ret[i] = this->substring(strI, strF);
+        lms = (matPos[i][1] +1) - matPos[i][0];
+        (matPos[i][0] > this->length())? strI = (this->length() - rs): strI = matPos[i][0] - rs;
+        (count <= (i + 1))? strF = (this->length() -rs): strF = (matPos[i][1] +1) - rs;
+        buff2 = buff.substring(0, strI).get();
+        ret.push_back(buff2);
+        ls = buff2.length();
+        buff2 = buff;
+        buff = buff2.substring(strF, buff2.length());
+        rs = strF;
+    }
+    
+    ret.push_back(buff2.substring(strF+ls+lms, buff2.length()));
+    sw = ret;
+    ret.clear();
+
+    while (! sw.empty())
+    {
+        ret.push_back(sw.back());
+        sw.pop_back();
     }
 
     return ret;
@@ -1214,97 +1148,33 @@ tkv::tkString tkv::tkString::rightJoin(tkString str)
     return this->rightJoin(str.get());
 }
 
-tkv::tkString tkv::tkString::leftJoin(std::string *strs)
+tkv::tkString tkv::tkString::leftJoin(std::vector<std::string> s)
 {
     tkString ret = this->get();
 
-    if (strs == nullptr)
+    if (s.empty())
         return tkv::tkString();
 
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    for (int i = 0; i < s.size(); i++)
     {
         tkString tmBuf = ret;
-        ret = tmBuf.leftJoin(strs[i]);
+        ret = tmBuf.leftJoin(s[i]);
     }
 
     return ret;
 }
 
-tkv::tkString tkv::tkString::rightJoin(std::string *strs)
+tkv::tkString tkv::tkString::rightJoin(std::vector<std::string> s)
 {
     tkString ret = this->get();
 
-    if (strs == nullptr)
+    if (s.empty())
         return tkv::tkString();
 
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
+    for (int i = 0; i < s.size(); i++)
     {
         tkString tmBuf = ret;
-        ret = tmBuf.rightJoin(strs[i]);
-    }
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::leftJoin(tkString *strs)
-{
-    tkString ret = this->get();
-
-    if (strs == nullptr)
-        return tkv::tkString();
-
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
-    {
-        tkString tmBuf = ret;
-        ret = tmBuf.leftJoin(strs[i]);
-    }
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::rightJoin(tkString *strs)
-{
-    tkString ret = this->get();
-
-    if (strs == nullptr)
-        return tkv::tkString();
-
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
-    {
-        tkString tmBuf = ret;
-        ret = tmBuf.rightJoin(strs[i]);
-    }
-
-    return ret;
-}
-
-tkv::tkString tkv::tkString::leftJoin(char **strs)
-{
-    tkString ret = this->get();
-
-    if (strs == nullptr)
-        return tkv::tkString();
-
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
-    {
-        tkString tmBuf = ret;
-        ret = tmBuf.leftJoin(strs[i]);
-    }
-
-    return ret;   
-}
-
-tkv::tkString tkv::tkString::rightJoin(char **strs)
-{
-    tkString ret = this->get();
-
-    if (strs == nullptr)
-        return tkv::tkString();
-
-    for (int i = 0; i < sizeof(strs) / sizeof(strs[0]); i++)
-    {
-        tkString tmBuf = ret;
-        ret = tmBuf.rightJoin(strs[i]);
+        ret = tmBuf.rightJoin(s[i]);
     }
 
     return ret;
@@ -1352,9 +1222,10 @@ tkv::tkString tkv::tkString::shuffle()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::shuffle(this->get().begin(), this->get().end(), gen);
+    std::string s = this->get();
+    std::shuffle(s.begin(), s.end(), gen);
 
-    return this->get();
+    return tkv::tkString(s);
 }
 
 tkv::tkString tkv::tkString::randomCase()
@@ -1364,7 +1235,7 @@ tkv::tkString tkv::tkString::randomCase()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1000);
     
-    for (int i = 0; i < this->length(); i++)
+    for (int i = 0; i <= this->length(); i++)
     {
         if (dis(gen) %2 == 0)
         {//uper
@@ -1384,4 +1255,5 @@ tkv::tkString tkv::tkString::randomCase()
         }
         ret += (*this)[i];
     }
+    return ret;
 }
