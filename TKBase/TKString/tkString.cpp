@@ -12,7 +12,7 @@ tkv::tkString::tkString(char *str)
         return;
     }
 
-    this->set(std::string(str));
+    this->set(static_cast<std::string>(str));
 }
 
 tkv::tkString::tkString(std::string *str) 
@@ -44,7 +44,13 @@ tkv::tkString::tkString(std::string str)
 
 tkv::tkString& tkv::tkString::operator=(char *str)
 {
-    this->set(std::string(str));
+    this->set(static_cast<std::string>(str));
+    return *this;
+}
+
+tkv::tkString& tkv::tkString::operator=(const char *str)
+{
+    this->set(static_cast<std::string>(str));
     return *this;
 }
 
@@ -62,12 +68,13 @@ tkv::tkString& tkv::tkString::operator=(tkString str)
 
 tkv::tkString &tkv::tkString::operator+=(char *str)
 {
-    if (str == nullptr)
-    {
-        return *this;
-    }
+    this->set(this->get() + static_cast<std::string>(str));
+    return *this;
+}
 
-    this->set(this->get() + std::string(str));
+tkv::tkString &tkv::tkString::operator+=(const char *str)
+{
+    this->set(this->get() + static_cast<std::string>(str));
     return *this;
 }
 
@@ -96,7 +103,7 @@ char tkv::tkString::operator[](int index)
 
 tkv::tkInternalSearch tkv::tkString::evalueExpression(char *mask)
 {
-    return this->evalueExpression(std::string(mask));
+    return this->evalueExpression(static_cast<std::string>(mask));
 }
 
 std::string tkv::tkString::get()
@@ -116,7 +123,12 @@ void tkv::tkString::set(tkString str)
 
 void tkv::tkString::set(char *str)
 {
-    this->set(std::string(str));
+    this->set(static_cast<std::string>(str));
+}
+
+void tkv::tkString::set(const char *str)
+{
+    this->set(static_cast<std::string>(str));
 }
 
 tkv::tkInternalSearch tkv::tkString::evalueExpression(std::string mask)
@@ -169,7 +181,7 @@ int tkv::tkString::length()
 
 bool tkv::tkString::startWith(char* mask, bool regexUsed)
 {
-    return this->startWith(std::string(mask), regexUsed);
+    return this->startWith(static_cast<std::string>(mask), regexUsed);
 }
 
 bool tkv::tkString::startWith(std::string mask, bool regexUsed)
@@ -202,7 +214,7 @@ bool tkv::tkString::startWith(char mask)
 
 bool tkv::tkString::endWith(char* mask, bool regexUsed)
 {
-    return this->endWith(std::string(mask), regexUsed);
+    return this->endWith(static_cast<std::string>(mask), regexUsed);
 }
 
 bool tkv::tkString::endWith(std::string mask, bool regexUsed)
@@ -253,7 +265,7 @@ tkv::tkString tkv::tkString::substring(int pi, int pf)
    
     if (pi > pf)
     {
-        return "";           
+        return tkv::tkString();           
     }                       
    
     return (tkv::tkString) this->get().substr(pi, pf - pi);
@@ -345,7 +357,7 @@ int* tkv::tkString::indexOf(std::string str, bool regexUsed)
 
 int* tkv::tkString::indexOf(char *str, bool regexUsed)
 {
-    return this->indexOf(std::string(str), regexUsed);
+    return this->indexOf(static_cast<std::string>(str), regexUsed);
 }
 
 int* tkv::tkString::lastIndexOf(std::string str, bool regexUsed)
@@ -370,7 +382,7 @@ int* tkv::tkString::lastIndexOf(std::string str, bool regexUsed)
 
 int* tkv::tkString::lastIndexOf(char *str, bool regexUsed)
 {
-    return this->lastIndexOf(std::string(str), regexUsed);
+    return this->lastIndexOf(static_cast<std::string>(str), regexUsed);
 }
 
 int** tkv::tkString::allIndexOf(std::string str, bool regexUsed)
@@ -422,7 +434,7 @@ int** tkv::tkString::allIndexOf(std::string str, bool regexUsed)
 
 int** tkv::tkString::allIndexOf(char *str, bool regexUsed)
 {
-    return this->allIndexOf(std::string(str), regexUsed);
+    return this->allIndexOf(static_cast<std::string>(str), regexUsed);
 }
 
 int tkv::tkString::occurrencesOf(std::string str, bool regexUsed)
@@ -463,7 +475,7 @@ int tkv::tkString::occurrencesOf(std::string str, bool regexUsed)
 
 int tkv::tkString::occurrencesOf(char *str, bool regexUsed)
 {
-    return this->occurrencesOf(std::string(str), regexUsed);
+    return this->occurrencesOf(static_cast<std::string>(str), regexUsed);
 }
 
 int tkv::tkString::occurrencesOf(char ch)
@@ -493,7 +505,7 @@ bool tkv::tkString::contains(std::string str, bool regexUsed)
 
 bool tkv::tkString::contains(char *str, bool regexUsed)
 {
-    return this->contains(std::string(str), regexUsed);
+    return this->contains(static_cast<std::string>(str), regexUsed);
 }
 
 bool tkv::tkString::contains(char ch)
@@ -503,7 +515,7 @@ bool tkv::tkString::contains(char ch)
 
 int* tkv::tkString::getNumbers()
 {
-    tkv::tkInternalSearch result = this->evalueExpression("\\d+");
+    tkv::tkInternalSearch result = this->evalueExpression(std::string("\\d+"));
 
     if (! result.founded)
     {
@@ -618,7 +630,7 @@ int tkv::tkString::levenshteinDistance(std::string str)
 
 int tkv::tkString::levenshteinDistance(char *str)
 {
-    return this->levenshteinDistance(std::string(str));
+    return this->levenshteinDistance(static_cast<std::string>(str));
 }
 
 tkv::tkString tkv::tkString::randomString(int length)
@@ -780,13 +792,13 @@ tkv::tkString tkv::tkString::replace(std::string mask, char c, bool regexUsed)
 
 tkv::tkString tkv::tkString::replace(std::string mask, char* newText, bool regexUsed)
 {
-    return this->replace(mask, std::string(newText), regexUsed); 
+    return this->replace(mask, static_cast<std::string>(newText), regexUsed); 
 }
 
 tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::vector<std::string> newText, bool regexUsed)
 {
     tkv::tkString ret = this->get();
-    tkv::tkString tmBuf = "";
+    tkv::tkString tmBuf = std::string("");
 
     if (mask.empty() || newText.empty())
     {
@@ -805,7 +817,7 @@ tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::vector<
 tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::string newText, bool regexUsed)
 {
     tkv::tkString ret = this->get();
-    tkv::tkString tmBuf = "";
+    tkv::tkString tmBuf = std::string("");
 
     if (mask.empty() || newText.empty())
     {
@@ -824,17 +836,17 @@ tkv::tkString tkv::tkString::replace(std::vector<std::string> mask, std::string 
 
 tkv::tkString tkv::tkString::replace(char *mask, std::string newText, bool regexUsed)
 {
-    return this->replace(std::string(mask), newText, regexUsed);
+    return this->replace(static_cast<std::string>(mask), newText, regexUsed);
 }
 
 tkv::tkString tkv::tkString::replace(char *mask, char *newText, bool regexUsed)
 {
-    return this->replace(std::string(mask), std::string(newText), regexUsed);
+    return this->replace(static_cast<std::string>(mask), static_cast<std::string>(newText), regexUsed);
 }
 
 tkv::tkString tkv::tkString::replace(char *mask, char c, bool regexUsed)
 {
-    return this->replace(std::string(mask), c, regexUsed);
+    return this->replace(static_cast<std::string>(mask), c, regexUsed);
 }
 
 tkv::tkString tkv::tkString::replace(char c, std::string newText)
@@ -844,7 +856,7 @@ tkv::tkString tkv::tkString::replace(char c, std::string newText)
 
 tkv::tkString tkv::tkString::replace(char c, char* newText)
 {
-    return this->replace(std::string(1,c), std::string(newText));
+    return this->replace(std::string(1,c), static_cast<std::string>(newText));
 }
 
 tkv::tkString tkv::tkString::trimLeft()
@@ -886,17 +898,17 @@ tkv::tkString tkv::tkString::trim()
 
 tkv::tkString tkv::tkString::upper(char* str, bool regexUsed)
 {
-    return this->upper(std::string(str), regexUsed);
+    return this->upper(static_cast<std::string>(str), regexUsed);
 }
 
 tkv::tkString tkv::tkString::lower(char *str, bool regexUsed)
 {
-    return this->lower(std::string(str), regexUsed);
+    return this->lower(static_cast<std::string>(str), regexUsed);
 }
 
 tkv::tkString tkv::tkString::reverse()
 {
-    tkv::tkString ret = "";
+    tkv::tkString ret = std::string("");
 
     for (int i = this->length() - 1; i >= 0; i--)
     {
@@ -1068,7 +1080,7 @@ tkv::tkString tkv::tkString::lower(std::string mask, bool regexUsed)
 
 std::vector<tkv::tkString> tkv::tkString::split(char* mask, bool regexUsed)
 {
-    return this->split(std::string(mask), regexUsed);
+    return this->split(static_cast<std::string>(mask), regexUsed);
 }
 
 std::vector<tkv::tkString> tkv::tkString::split(std::string mask, bool regexUsed)
@@ -1130,12 +1142,12 @@ tkv::tkString tkv::tkString::rightJoin(std::string str)
 
 tkv::tkString tkv::tkString::leftJoin(char *str)
 {
-    return this->leftJoin(std::string(str));
+    return this->leftJoin(static_cast<std::string>(str));
 }
 
 tkv::tkString tkv::tkString::rightJoin(char *str)
 {
-    return this->rightJoin(std::string(str));
+    return this->rightJoin(static_cast<std::string>(str));
 }
 
 tkv::tkString tkv::tkString::leftJoin(tkString str)

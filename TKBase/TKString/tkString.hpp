@@ -33,10 +33,12 @@ namespace tkv {
         tkString(std::string str);                                                              
         tkString(std::string* str);                                                                                                                                       
         tkString(tkString* str);                                                                
-        tkString &operator=(char* str);                                                         
+        tkString &operator=(char* str); 
+        tkString &operator=(const char* str);                                                        
         tkString &operator=(std::string str);                                                   
         tkString &operator=(tkString);                                                          
-        tkString &operator+=(char* str);                                                        
+        tkString &operator+=(char* str);
+        tkString &operator+=(const char* str);                                                        
         tkString &operator+=(std::string str);                                                  
         tkString &operator+=(char);                                                             
         tkString &operator+=(tkString);                                                         
@@ -113,7 +115,8 @@ namespace tkv {
         std::string get();                                                                      
         void set(std::string);                                                                  
         void set(tkString);                                                                     
-        void set(char *str);                                                                    
+        void set(char *str);   
+        void set(const char* str);                                                                 
 
         // Auxiliares
         int* getNumbers();                                                                      
