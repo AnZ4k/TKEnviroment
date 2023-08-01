@@ -2,7 +2,18 @@
 #define TKJSONNODEOBJECT
 #include "TKJsonIncludes.hpp"
 namespace tkv
-{
+{   
+
+/**
+ * TODO:
+ * asBool  asInt asStr asFloat
+ * 
+ * TODO:
+ * operators (= [] v=)
+ * 
+ * TODO: 
+ * setBool setInt setStr setFloat
+ */
     class TKJSONObjectNode 
     {
         public:
@@ -20,11 +31,32 @@ namespace tkv
             void setValue(char* pValue);
             void setChildren(std::deque<tkv::TKJSONObjectNode> pChildren);
             
-            void addNode(tkv::TKJSONObjectNode pNode, bool pAtEnd = true);
+            TKJSONObjectNode addNode(tkv::TKJSONObjectNode pNode, bool pAtEnd = true);
+            TKJSONObjectNode put(tkv::tkString const key, tkv::tkString const val);
             
             tkv::TKJSONObjectNode *getNode(int pIndex);
             tkv::TKJSONObjectNode *getNode(char* pKey);
             tkv::TKJSONObjectNode *getNode(std::string pKey);
+
+            TKJSONObjectNode& operator = (bool);
+            TKJSONObjectNode& operator = (int);
+            TKJSONObjectNode& operator = (float);
+            TKJSONObjectNode& operator = (double);
+            TKJSONObjectNode& operator = (std::string);
+            TKJSONObjectNode& operator = (tkv::tkString);
+            TKJSONObjectNode& operator = (char*);
+            TKJSONObjectNode& operator = (char);
+
+            operator std::string() const;
+            
+            float asFloat(void);
+            int asInt(void);
+            bool asBool(void);
+            double asDouble(void);
+            std::string asstring(void);
+            char* asCSTR(void);
+            tkv::tkString asTKString(void);
+
         private:
             tkv::tkString iKey;
             tkv::tkString iValue;

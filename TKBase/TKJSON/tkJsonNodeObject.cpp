@@ -68,7 +68,7 @@ void tkv::TKJSONObjectNode::setChildren(std::deque<tkv::TKJSONObjectNode> pChild
     this->mChildren = pChildren;
 }
 
-void tkv::TKJSONObjectNode::addNode(tkv::TKJSONObjectNode pNode, bool pAtEnd)
+tkv::TKJSONObjectNode tkv::TKJSONObjectNode::addNode(tkv::TKJSONObjectNode pNode, bool pAtEnd)
 {
     if (pAtEnd)
     {
@@ -77,6 +77,8 @@ void tkv::TKJSONObjectNode::addNode(tkv::TKJSONObjectNode pNode, bool pAtEnd)
     }
 
     this->mChildren.push_front(pNode);
+
+    return *this;
 }
 
 tkv::TKJSONObjectNode* tkv::TKJSONObjectNode::getNode(int pIndex)
